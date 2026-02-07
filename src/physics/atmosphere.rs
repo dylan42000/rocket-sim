@@ -1,4 +1,4 @@
-use crate::types::G0;
+use crate::dynamics::state::G0;
 
 // ---------------------------------------------------------------------------
 // ISA 1976 Standard Atmosphere (sea level to 86 km)

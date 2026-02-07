@@ -1,9 +1,29 @@
 [package]
 name = "rocket-sim"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
-description = "3DOF rocket flight dynamics simulation"
+description = "6DOF multi-stage rocket flight simulation with GNC, orbital mechanics, and visualization"
 license = "MIT"
+repository = "https://github.com/ZenAlexa/rocket-sim"
+homepage = "https://github.com/ZenAlexa/rocket-sim"
+keywords = ["rocket", "simulation", "6dof", "orbital-mechanics", "flight-dynamics"]
+categories = ["simulation", "science", "aerospace"]
+readme = "README.md"
+default-run = "rocket-sim"
 
 [dependencies]
 nalgebra = "0.34"
+eframe = { version = "0.33", optional = true, default-features = false, features = [
+  "default_fonts",
+  "glow",
+] }
+egui_plot = { version = "0.34", optional = true }
+
+[features]
+default = []
+viz = ["eframe", "egui_plot"]
+
+[[bin]]
+name = "rocket-viz"
+path = "src/bin/viz.rs"
+required-features = ["viz"]
