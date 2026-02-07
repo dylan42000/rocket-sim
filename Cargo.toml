@@ -1,0 +1,9 @@
+[package]
+name = "rocket-sim"
+version = "0.1.0"
+edition = "2021"
+description = "3DOF rocket flight dynamics simulation"
+license = "MIT"
+
+[dependencies]
+nalgebra = "0.34"
